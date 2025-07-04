@@ -1,33 +1,24 @@
 #!/bin/bash
 
 backup_file="backup.log"
-backup_dir="home/user/backup"
+backup_dir="/home/user/backup"
 time=$(date +"%d-%m-%Y-%H%M")
 target="$1"
 
 
 
-
-if [[ $# != 1 ]] ;
+if [ ! -d "$backup_dir" ];
 then
-	read -p "type a folder you want to archive it : " file
-	if [[ -f "$file" ]] ;
-	then
-		target="$file"
-		archiving
-	else
-		echo "file not exist"
-		exit 1
-	fi
+	mkdir -p "$backup_dir"
 fi
 
 
 
 archiving()
 {
-	tar -czvf "$target" "$target".tar.gz."$time"
-	mv "$target".tar.gz."$time" "$backup_dire"
-	echo " archiving of $terget has done in $time" >> "$backup_file"
+	tar -czvf  "$target".tar.gz."$time" "$target"
+	mv "$target".tar.gz."$time" "$backup_dir"
+	echo " archiving of $target has done in $time" >> "$backup_file"
 }
 restoring()
 {
@@ -59,4 +50,17 @@ case $1 in
 		;;
 	* ) echo " Usage : [ --restoring | --listing ] "
 esac
+
+if [[ $# != 1 ]] ;
+then
+	read -p "type a folder you want to archive it : " file
+	if [[ -f "$file" ]] ;
+	then
+		target="$file"
+		archiving
+	else
+		echo "file not exist"
+		exit 1
+	fi
+fi
 
