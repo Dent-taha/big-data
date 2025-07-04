@@ -4,7 +4,7 @@
 #variable
 
 cpu=$(top -bn1 | grep "Cpu(s)" | awk '{ printf $2 + $4 }' )
-ram=$(free | grep "Mem" | awk '{printf $2 / $3 *100 }' |sed 's/%//')
+ram=$(free | grep "Mem" | awk '{printf $3 / $2 *100 }' |sed 's/%//')
 hard=$(df -h / | tail -n 1 | awk '{printf $5 }' |sed 's/%//')
 threshold=20
 log_file="file.log"
@@ -15,7 +15,7 @@ services=("mysql" "nginx" )
 #functions
 CPU()
 {
-	if (($(echo "$cpu" > "$threshold" | bc -l ) ));
+	if (($(echo "$cpu  > $threshold" | bc -l ) ));
 	then
 		echo "high CPU USage" 
 	else
@@ -26,7 +26,7 @@ CPU()
 
 RAM()
 {
-	if (($(echo "$ram" > "$threshold" | bc -l )));
+	if (($(echo "$ram  > $threshold" | bc -l )));
 	then
 		echo " High RAM Usage"
 	else
@@ -35,7 +35,7 @@ RAM()
 }
 HARD()
 {
-	if (($(echo "$hard" > "$threshold" |bc -l )));
+	if (($(echo "$hard  > $threshold" |bc -l )));
 	then
 		echo "Your hard is almost full"
 	else
@@ -75,25 +75,17 @@ service_state()
 loging >> $log_file
 
 
-if [[ "$1" = "--report" ]];
-then
-	cat "$log_file"
-fi
 
-if [[ "$1" = "--cpu" ]];
-then
-	echo " cpu =$cpu"
-	CPU
-fi
-if [[ "$1" = "--ram" ]];
-then
-	echo "ram =$ram"
-	RAM
-fi
+case $1 in 
+	--report ) cat "$log_file"
+		;;
+	--cpu ) echo "cpu =$cpu" ;CPU
+		;;
+	--ram ) echo "ram = $ram " ; RAM
+		;;
+	--hard ) echo "hrad = $hard " ; HARD
+		;;
+	* ) echo "Usage : $0 [ --report | --cpu | --ram | --hard ] "
+esac
 
-if [[ "$1" = "--hard" ]];
-then
-	echo " hard = $hard"
-	HARD
-fi
 
